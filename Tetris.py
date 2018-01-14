@@ -1,6 +1,7 @@
 import sys
 import pygame
 import numpy as np
+import time
 
 block_level =  0
 
@@ -54,6 +55,7 @@ def block_spawn(board, block):
 
 # Rotates a block
 def block_rotate(block):
+
     for _ in range(3):
         block = np.rot90(block)
 
@@ -62,13 +64,23 @@ def block_rotate(block):
 
 # Makes the block fall 1 level
 def block_fall(board):
-    temp = np.zeros(10, dtype=int)
 
-    i = block_level
-    for i in range(i, i + 4):
-        for j in range(10):
-            temp[j] = board[i][j]
-            board[i][j] = board[i][j - 1]
+    global block_level
+
+    if (block_level < 19):
+
+        block_index = block_level + 3
+
+        for _ in range(3):
+            for j in range(0, 10):
+                board[block_index][j] = board[block_index - 1][j]
+
+            block_index -= 1
+
+        board[block_index] = np.zeros(10, dtype=int)
+
+        block_level += 1
+
 
 
 def run():
@@ -94,7 +106,10 @@ def run():
 
     block_spawn(board, block_rotate(block_styles[2]))
 
-    print(board)
+    for _ in range(26):
+        block_fall(board)
+        print(board)
+        time.sleep(1)
 
 
 run()
