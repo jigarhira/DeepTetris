@@ -2,9 +2,11 @@ import sys
 import pygame
 import numpy as np
 import time
+import random
 
-block_level =  0
+from Block import Block
 
+'''
 # All 7 different types of blocks
 block_styles = [[[0, 0, 0, 0],
                  [0, 0, 0, 0],
@@ -40,76 +42,28 @@ block_styles = [[[0, 0, 0, 0],
                  [1, 1, 0, 0],
                  [0, 1, 1, 0],
                  [0, 0, 0, 0]]]
+'''
 
+# Creates a new Block object of a random type
+def block_spawn():
+    rand = random.randint(0,6)
+    b = Block(rand, 3, 0)
 
-# Spawns a random block
-def block_spawn(board, block):
-    i = 0
-    for row in block:
-        j = 3
-        for element in row:
-            board[i][j] = element
-            j += 1
-        i += 1
-
-
-# Rotates a block
-def block_rotate(block):
-
-    for _ in range(3):
-        block = np.rot90(block)
-
-    return block
-
-
-# Makes the block fall 1 level
-def block_fall(board):
-
-    global block_level
-
-    if (block_level < 19):
-
-        block_index = block_level + 3
-
-        for _ in range(3):
-            for j in range(0, 10):
-                board[block_index][j] = board[block_index - 1][j]
-
-            block_index -= 1
-
-        board[block_index] = np.zeros(10, dtype=int)
-
-        block_level += 1
-
+    return b
 
 
 def run():
-    '''
-    pygame.init()
+    board = np.zeros((22, 10), dtype=np.int)   # Creates an array initialized to zeros to represent the game board
 
-    window_size = 200, 400
+    block = block_spawn()
 
-    screen = pygame.display.set_mode(window_size)
+    board[block.s0_coord[1]][block.s0_coord[0]] = 1
+    board[block.s1_coord[1]][block.s1_coord[0]] = 1
+    board[block.s2_coord[1]][block.s2_coord[0]] = 1
+    board[block.s3_coord[1]][block.s3_coord[0]] = 1
 
-    open = True
-    while open:
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-                open = False
-
-    '''
-
-    board = np.zeros((22, 10), dtype=np.int)
-
-    block_spawn(board, block_rotate(block_styles[2]))
-
-    for _ in range(26):
-        block_fall(board)
-        print(board)
-        time.sleep(1)
+    print(board)
 
 
 run()
