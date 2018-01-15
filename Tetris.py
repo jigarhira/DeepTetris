@@ -71,9 +71,44 @@ def run():
     board = np.zeros((22, 10), dtype=np.int)   # Creates an array initialized to zeros to represent the game board
 
     block = block_spawn()
-
     block_draw(board, block)
-    print(board)
+
+    while True:
+
+        print("\n\n")
+
+        try:
+
+            if (((block.getSCoord(block.s0_coord)[1] < 21) and
+                 (block.getSCoord(block.s1_coord)[1] < 21) and
+                 (block.getSCoord(block.s2_coord)[1] < 21) and
+                 (block.getSCoord(block.s3_coord)[1] < 21)) and
+                ((board[(block.getSCoord(block.s0_coord)[1]) + 1][block.getSCoord(block.s0_coord)[0]] != 2) and
+                 (board[(block.getSCoord(block.s1_coord)[1]) + 1][block.getSCoord(block.s1_coord)[0]] != 2) and
+                 (board[(block.getSCoord(block.s2_coord)[1]) + 1][block.getSCoord(block.s2_coord)[0]] != 2) and
+                 (board[(block.getSCoord(block.s3_coord)[1]) + 1][block.getSCoord(block.s3_coord)[0]] != 2))):
+
+                block_clear(board, block)
+                block.down()
+                block_draw(board, block)
+
+                print(board)
+
+            else:
+                board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 2
+                board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 2
+                board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 2
+                board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 2
+
+                block = block_spawn()
+
+                print(board)
+
+        except IndexError:
+            pass
+
+        time.sleep(0.5)
+
 
 
 run()
