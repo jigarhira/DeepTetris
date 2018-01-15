@@ -44,34 +44,44 @@ block_styles = [[[0, 0, 0, 0],
                  [0, 0, 0, 0]]]
 '''
 
+
 # Creates a new Block object of a random type
 def block_spawn():
-    rand = random.randint(0,6)
+    rand = random.randint(0, 6)
     b = Block(rand, 3, 0)
 
     return b
 
-# Draws the block to the board
-def block_draw(board, block):
-    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 1
-    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 1
-    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 1
-    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 1
+
+# Draws the block to the board with a placeholder
+def block_draw(board, block, num):
+    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = num
+    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = num
+    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = num
+    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = num
 
 
-# Clears the block from the board
-def block_clear(board, block):
-    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 0
-    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 0
-    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 0
-    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 0
+# Checks if the block has hit the bottom of the board
+def block_is_bottom(block):
+    return ((block.getSCoord(block.s0_coord)[1] < 21) and
+            (block.getSCoord(block.s1_coord)[1] < 21) and
+            (block.getSCoord(block.s2_coord)[1] < 21) and
+            (block.getSCoord(block.s3_coord)[1] < 21))
+
+
+# Checks if the block has hit another block
+def block_hit_block(board, block):
+    return ((board[(block.getSCoord(block.s0_coord)[1]) + 1][block.getSCoord(block.s0_coord)[0]] != 2) and
+            (board[(block.getSCoord(block.s1_coord)[1]) + 1][block.getSCoord(block.s1_coord)[0]] != 2) and
+            (board[(block.getSCoord(block.s2_coord)[1]) + 1][block.getSCoord(block.s2_coord)[0]] != 2) and
+            (board[(block.getSCoord(block.s3_coord)[1]) + 1][block.getSCoord(block.s3_coord)[0]] != 2))
 
 
 def run():
     board = np.zeros((22, 10), dtype=np.int)   # Creates an array initialized to zeros to represent the game board
 
     block = block_spawn()
-    block_draw(board, block)
+    block_draw(board, block, 1)
 
     while True:
 
@@ -79,26 +89,19 @@ def run():
 
         try:
 
-            if (((block.getSCoord(block.s0_coord)[1] < 21) and
-                 (block.getSCoord(block.s1_coord)[1] < 21) and
-                 (block.getSCoord(block.s2_coord)[1] < 21) and
-                 (block.getSCoord(block.s3_coord)[1] < 21)) and
-                ((board[(block.getSCoord(block.s0_coord)[1]) + 1][block.getSCoord(block.s0_coord)[0]] != 2) and
-                 (board[(block.getSCoord(block.s1_coord)[1]) + 1][block.getSCoord(block.s1_coord)[0]] != 2) and
-                 (board[(block.getSCoord(block.s2_coord)[1]) + 1][block.getSCoord(block.s2_coord)[0]] != 2) and
-                 (board[(block.getSCoord(block.s3_coord)[1]) + 1][block.getSCoord(block.s3_coord)[0]] != 2))):
+            if block_is_bottom(block) and block_hit_block(board, block):
+                block_draw(board, block, 0)
 
-                block_clear(board, block)
+                if random.randint(0, 1):
+                    block.rotate()
+
                 block.down()
-                block_draw(board, block)
+                block_draw(board, block, 1)
 
                 print(board)
 
             else:
-                board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 2
-                board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 2
-                board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 2
-                board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 2
+                block_draw(board, block, 2)
 
                 block = block_spawn()
 
@@ -108,7 +111,6 @@ def run():
             pass
 
         time.sleep(0.5)
-
 
 
 run()
