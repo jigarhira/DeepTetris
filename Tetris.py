@@ -57,11 +57,12 @@ def run():
 
     block = block_spawn()
 
-    board[block.s0_coord[1]][block.s0_coord[0]] = 1
-    board[block.s1_coord[1]][block.s1_coord[0]] = 1
-    board[block.s2_coord[1]][block.s2_coord[0]] = 1
-    board[block.s3_coord[1]][block.s3_coord[0]] = 1
+    block.rotate()
 
+    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 1
+    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 1
+    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 1
+    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 1
 
     print(board)
 
