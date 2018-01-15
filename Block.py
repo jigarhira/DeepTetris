@@ -48,3 +48,20 @@ class Block:
         self.s3_coord = (coord_swap.get(temp[3]), self.s3_coord[0])
 
 
+    # Moves block down one level
+    def down(self):
+        self.location = (self.location[0], self.location[1] + 1)
+
+
+
+    # Moves block left one unit
+    def left(self):
+        self.location = (self.location[0] - 1, self.location[1])
+
+
+    # Moves block right one unit
+    def right(self):
+        self.location = (self.location[0] + 1, self.location[1])
+
+
+

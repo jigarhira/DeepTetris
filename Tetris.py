@@ -51,19 +51,28 @@ def block_spawn():
 
     return b
 
+# Draws the block to the board
+def block_draw(board, block):
+    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 1
+    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 1
+    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 1
+    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 1
+
+
+# Clears the block from the board
+def block_clear(board, block):
+    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 0
+    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 0
+    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 0
+    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 0
+
 
 def run():
     board = np.zeros((22, 10), dtype=np.int)   # Creates an array initialized to zeros to represent the game board
 
     block = block_spawn()
 
-    block.rotate()
-
-    board[block.getSCoord(block.s0_coord)[1]][block.getSCoord(block.s0_coord)[0]] = 1
-    board[block.getSCoord(block.s1_coord)[1]][block.getSCoord(block.s1_coord)[0]] = 1
-    board[block.getSCoord(block.s2_coord)[1]][block.getSCoord(block.s2_coord)[0]] = 1
-    board[block.getSCoord(block.s3_coord)[1]][block.getSCoord(block.s3_coord)[0]] = 1
-
+    block_draw(board, block)
     print(board)
 
 
