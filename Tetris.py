@@ -78,12 +78,20 @@ def block_hit_block(board, block):
 
 
 def run():
+
+    # Pygame setup
+    pygame.init()
+    pygame.display.set_mode((200, 440))
+
     board = np.zeros((22, 10), dtype=np.int)   # Creates an array initialized to zeros to represent the game board
 
     block = block_spawn()
     block_draw(board, block, 1)
 
     while True:
+
+        # Event object for pygame
+        events = pygame.event.get()
 
         print("\n\n")
 
@@ -92,8 +100,21 @@ def run():
             if block_is_bottom(block) and block_hit_block(board, block):
                 block_draw(board, block, 0)
 
-                if random.randint(0, 1):
-                    block.rotate()
+                # Event handler for pygame events
+                for event in events:
+                    # Keypress events
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            block.left()
+                        if event.key == pygame.K_RIGHT:
+                            block.right()
+
+                    # Close window event
+                    if event.type == pygame.QUIT:
+                        pygame.display.quit()
+                        pygame.quit()
+                        return
+
 
                 block.down()
                 block_draw(board, block, 1)
