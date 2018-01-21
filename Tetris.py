@@ -4,6 +4,7 @@ import time
 import random
 
 from Block import Block
+import GUI
 
 '''
 # All 7 different types of blocks
@@ -48,10 +49,13 @@ block_styles = [[[0, 0, 0, 0],
 BUG: rotating can phase through existing blocks
 BUG: index exception not properly handled for right block movement
 BUG: rotating near edge of the board can cause IndexError
+BUG: allow for movement for 1 cycle after a 'hit'
 
 CLEAN: create functions and clean repetitive code in Tetris.py and Block.py
 
 TEST: test is completed lines above the bottom get cleared
+
+FEATURE: Each new block prints a different integer to the board to signify a specific color. Number is then used by GUI to draw different colors
 
 '''
 
@@ -121,7 +125,7 @@ def board_clear_lines(board, level):
 def run():
     # Pygame setup
     pygame.init()
-    pygame.display.set_mode((200, 440))
+    screen = pygame.display.set_mode((200, 400))
 
     board = np.zeros((22, 10), dtype=np.int)  # Creates an array initialized to zeros to represent the game board
 
@@ -190,6 +194,9 @@ def run():
         else:
             block_draw(board, block, 2)
             block = block_spawn()
+
+        # Draws the board to the screen
+        GUI.draw_board(screen, board)
 
         # Executes every second
         if time.time() >= old_time + 0.5:
