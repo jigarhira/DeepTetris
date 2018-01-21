@@ -56,12 +56,20 @@ class Block:
 
     # Moves block left one unit
     def left(self):
-        self.location = (self.location[0] - 1, self.location[1])
+        if ((self.getSCoord(self.s0_coord)[0] > 0) and
+            (self.getSCoord(self.s1_coord)[0] > 0) and
+            (self.getSCoord(self.s2_coord)[0] > 0) and
+            (self.getSCoord(self.s3_coord)[0] > 0)):
+            self.location = (self.location[0] - 1, self.location[1])
 
 
     # Moves block right one unit
     def right(self):
-        self.location = (self.location[0] + 1, self.location[1])
+        if ((self.getSCoord(self.s0_coord)[0] < 9) and
+            (self.getSCoord(self.s1_coord)[0] < 9) and
+            (self.getSCoord(self.s2_coord)[0] < 9) and
+            (self.getSCoord(self.s3_coord)[0] < 9)):
+            self.location = (self.location[0] + 1, self.location[1])
 
 
 
