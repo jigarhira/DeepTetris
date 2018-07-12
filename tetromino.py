@@ -1,7 +1,9 @@
 # Tetromino (a Tetris clone)
 # By Al Sweigart al@inventwithpython.com
 # http://inventwithpython.com/pygame
-# Released under a "Simplified BSD" license
+
+# Additional changes for AI made by Jigar Hira
+
 
 import random, time, pygame, sys
 from pygame.locals import *
@@ -189,7 +191,7 @@ def runGame():
     nextPiece = getNewPiece()
 
     while True: # game loop
-        if fallingPiece == None:
+        if fallingPiece is None:
             # No falling piece in play, so start a new piece at the top
             fallingPiece = nextPiece
             nextPiece = getNewPiece()
@@ -201,7 +203,7 @@ def runGame():
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
             if event.type == KEYUP:
-                if (event.key == K_p):
+                if event.key == K_p:
                     # Pausing the game
                     DISPLAYSURF.fill(BGCOLOR)
                     pygame.mixer.music.stop()
@@ -209,11 +211,11 @@ def runGame():
                     lastFallTime = time.time()
                     lastMoveDownTime = time.time()
                     lastMoveSidewaysTime = time.time()
-                elif (event.key == K_LEFT or event.key == K_a):
+                elif event.key == K_LEFT or event.key == K_a:
                     movingLeft = False
-                elif (event.key == K_RIGHT or event.key == K_d):
+                elif event.key == K_RIGHT or event.key == K_d:
                     movingRight = False
-                elif (event.key == K_DOWN or event.key == K_s):
+                elif event.key == K_DOWN or event.key == K_s:
                     movingDown = False
 
             elif event.type == KEYDOWN:
@@ -231,17 +233,17 @@ def runGame():
                     lastMoveSidewaysTime = time.time()
 
                 # rotating the piece (if there is room to rotate)
-                elif (event.key == K_UP or event.key == K_w):
+                elif event.key == K_UP or event.key == K_w:
                     fallingPiece['rotation'] = (fallingPiece['rotation'] + 1) % len(PIECES[fallingPiece['shape']])
                     if not isValidPosition(board, fallingPiece):
                         fallingPiece['rotation'] = (fallingPiece['rotation'] - 1) % len(PIECES[fallingPiece['shape']])
-                elif (event.key == K_q): # rotate the other direction
+                elif event.key == K_q: # rotate the other direction
                     fallingPiece['rotation'] = (fallingPiece['rotation'] - 1) % len(PIECES[fallingPiece['shape']])
                     if not isValidPosition(board, fallingPiece):
                         fallingPiece['rotation'] = (fallingPiece['rotation'] + 1) % len(PIECES[fallingPiece['shape']])
 
                 # making the piece fall faster with the down key
-                elif (event.key == K_DOWN or event.key == K_s):
+                elif event.key == K_DOWN or event.key == K_s:
                     movingDown = True
                     if isValidPosition(board, fallingPiece, adjY=1):
                         fallingPiece['y'] += 1
@@ -288,7 +290,7 @@ def runGame():
         drawBoard(board)
         drawStatus(score, level)
         drawNextPiece(nextPiece)
-        if fallingPiece != None:
+        if fallingPiece is not None:
             drawPiece(fallingPiece)
 
         pygame.display.update()
@@ -335,7 +337,7 @@ def showTextScreen(text):
     pressKeyRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 100)
     DISPLAYSURF.blit(pressKeySurf, pressKeyRect)
 
-    while checkForKeyPress() == None:
+    while checkForKeyPress() is None:
         pygame.display.update()
         FPSCLOCK.tick()
 
@@ -384,7 +386,7 @@ def getBlankBoard():
 
 
 def isOnBoard(x, y):
-    return x >= 0 and x < BOARDWIDTH and y < BOARDHEIGHT
+    return 0 <= x < BOARDWIDTH and y < BOARDHEIGHT
 
 
 def isValidPosition(board, piece, adjX=0, adjY=0):
@@ -443,7 +445,7 @@ def drawBox(boxx, boxy, color, pixelx=None, pixely=None):
     # pixelx & pixely (this is used for the "Next" piece).
     if color == BLANK:
         return
-    if pixelx == None and pixely == None:
+    if pixelx is None and pixely is None:
         pixelx, pixely = convertToPixelCoords(boxx, boxy)
     pygame.draw.rect(DISPLAYSURF, COLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
     pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
@@ -477,7 +479,7 @@ def drawStatus(score, level):
 
 def drawPiece(piece, pixelx=None, pixely=None):
     shapeToDraw = PIECES[piece['shape']][piece['rotation']]
-    if pixelx == None and pixely == None:
+    if pixelx is None and pixely is None:
         # if pixelx & pixely hasn't been specified, use the location stored in the piece data structure
         pixelx, pixely = convertToPixelCoords(piece['x'], piece['y'])
 
