@@ -7,9 +7,12 @@
 
 import random, time, pygame, sys
 from pygame.locals import *
+import numpy as np
 
 # API Variables
-SPEEDFACTOR = 10
+SPEEDFACTOR = 1
+CURRENTBOARD = []
+CURRENTSCORE = 0
 
 FPS = 25 * SPEEDFACTOR
 WINDOWWIDTH = 640
@@ -160,7 +163,7 @@ PIECES = {'S': S_SHAPE_TEMPLATE,
           'T': T_SHAPE_TEMPLATE}
 
 
-def main():
+def tetromino():
     global FPSCLOCK, DISPLAYSURF, BASICFONT, BIGFONT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -206,7 +209,6 @@ def runGame():
                 if event.key == K_p:
                     # Pausing the game
                     DISPLAYSURF.fill(BGCOLOR)
-                    pygame.mixer.music.stop()
                     showTextScreen('Paused') # pause until a key press
                     lastFallTime = time.time()
                     lastMoveDownTime = time.time()
@@ -288,6 +290,10 @@ def runGame():
         # drawing everything on the screen
         DISPLAYSURF.fill(BGCOLOR)
         drawBoard(board)
+
+        CURRENTBOARD = board
+        CURRENTSCORE = score
+
         drawStatus(score, level)
         drawNextPiece(nextPiece)
         if fallingPiece is not None:
@@ -500,5 +506,27 @@ def drawNextPiece(piece):
     drawPiece(piece, pixelx=WINDOWWIDTH-120, pixely=100)
 
 
+# API Functions
+
+# Returns the board as a numpy array
+def get_board(b):
+    b_np = np.zeros((len(b), len(b[0])), dtype='int')
+
+    for i in range(len(b)):
+        for j in range(len(b[i])):
+            if b[i][j] == '.':
+                b_np[i][j] = 0
+            else:
+                b_np[i][j] = 1
+
+    return b_np.transpose()
+
+
+# Prepare data for tf
+def prepare_data(board):
+    data = board.flatten()
+
+    print(data)
+
 if __name__ == '__main__':
-    main()
+    tetromino()
