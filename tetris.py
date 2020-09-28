@@ -14,7 +14,7 @@ class TetrisGame:
 
     # pygame parameters
     FRAMERATE = 1
-    WINDOW_SIZE = (400, 400)
+    WINDOW_SIZE = (400, 100)
     WINDOW_TITLE = 'Tetris'
 
     # tetris parameters
@@ -33,18 +33,23 @@ class TetrisGame:
         self.board = np.zeros(self.BOARD_SIZE, dtype=int)
         self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), 7)   # fill hidden portion at the bottom of the board
 
+        # initialize score
+        self.score = 0
+
 
     def play(self):
-        # spawn a new piece
+        # spawn the first piece
         self.spawn_piece()
 
+        # game loop
         while True:
+
             # event handling
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:    # keypress
                     if event.key == pygame.K_w:
                         # rotate piece
-                        pass
+                        self.piece_rotate()
                     elif event.key == pygame.K_a:
                         # move piece left
                         self.piece_left()
@@ -60,6 +65,12 @@ class TetrisGame:
                 elif event.type == pygame.QUIT:     # close window
                     pygame.quit()
                     break
+
+            # move the piece down at one second intervals
+                # check if piece should be placed
+
+            # check board for completed row
+            
 
             # render and print board
             self.print_board(self.render_board())
@@ -100,27 +111,45 @@ class TetrisGame:
         new_location = (location[0] + offset[0], location[1] + offset[1])
 
         # check new piece position
-        if self.check_piece_position(new_location):
+        if self.check_piece_position(location=new_location):
             # update piece location
             self.piece.location = new_location
 
 
-    def check_piece_position(self, location=None) -> bool:
-        # piece location and size
+    def piece_rotate(self):
+        # current and new piece rotation
+        rotation = self.piece.shape
+        new_rotation = np.rot90(rotation)
+
+        # check new piece position
+        if self.check_piece_position(shape=new_rotation):
+            # update piece rotation
+            self.piece.shape = new_rotation
+
+
+    def check_piece_position(self, location=None, shape=None) -> bool:
+        # default parameters
         if location is None:
             location = self.piece.location
+        if shape is None:
+            shape = self.piece.shape
+
+        # piece location and size
         (i, j) = self.coord_to_index(location)
         (piece_h, piece_w) = self.piece.size
 
         # board location
         sub_board = self.board[i:i + piece_h, j:j + piece_w]
 
+        # TODO
+        # THERE IS AN ERROR HERE. BOUNDARY BOX WILL RESTRICT MOVEMENT.
+
         # check left and right bounds
         if (j < 0) or (j + piece_w > self.BOARD_SIZE[1]):
             return False
 
         # check for overlap
-        if np.sum(sub_board * self.piece.shape) == 0:
+        if np.sum(sub_board * shape) == 0:
             # valid position
             return True
         else:
