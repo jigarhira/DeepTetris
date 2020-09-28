@@ -12,11 +12,14 @@ import pygame
 
 class TetrisGame:
 
+    # pygame parameters
     FRAMERATE = 1
     WINDOW_SIZE = (400, 400)
     WINDOW_TITLE = 'Tetris'
 
-    BOARD_SIZE = (40, 10)   # internal game board size, only bottom 20 rows are visable
+    # tetris parameters
+    BOARD_SIZE = (44, 10)       # internal game board size, 20 rows are visable
+    BOARD_BOTTOM_FILL_ROWS = 4  # hidden filled rows at the bottom of the board
 
     def __init__(self):
         # initialize pygame
@@ -28,23 +31,38 @@ class TetrisGame:
 
         # initialize game board
         self.board = np.zeros(self.BOARD_SIZE, dtype=int)
+        self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), 7)   # fill hidden portion at the bottom of the board
 
 
     def play(self):
+        # spawn a new piece
         self.spawn_piece()
 
         while True:
-            # move piece down
-            self.piece_down()
+            # event handling
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:    # keypress
+                    if event.key == pygame.K_w:
+                        # rotate piece
+                        pass
+                    elif event.key == pygame.K_a:
+                        # move piece left
+                        self.piece_left()
+                    elif event.key == pygame.K_s:
+                        # move piece down
+                        self.piece_down()
+                    elif event.key == pygame.K_d:
+                        # move piece right
+                        self.piece_right()        
+                    elif event.key == pygame.K_SPACE:
+                        # drop piece to bottom
+                        pass
+                elif event.type == pygame.QUIT:     # close window
+                    pygame.quit()
+                    break
 
             # render and print board
             self.print_board(self.render_board())
-
-            # event handling
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:   # close window
-                    pygame.quit()
-                    break
 
             # timing
             self.clock.tick(self.FRAMERATE)
@@ -52,7 +70,11 @@ class TetrisGame:
     
     def print_board(self, board:np.ndarray):
         print('\n\n------~ TETRIS ~------')
-        print(np.flipud(board[:22][:]))
+        print(np.flipud(board[0:26, :]))
+
+
+    def coord_to_index(self, coord: (int, int)) -> (int, int):
+        return (coord[0] + self.BOARD_BOTTOM_FILL_ROWS, coord[1])
 
 
     def spawn_piece(self):
@@ -61,24 +83,41 @@ class TetrisGame:
 
 
     def piece_down(self):
-        # piece location
-        (x, y) = self.piece.location
+        self.piece_move((-1, 0))
+
+
+    def piece_left(self):
+        self.piece_move((0, -1))
+
+
+    def piece_right(self):
+        self.piece_move((0, 1))
+
+
+    def piece_move(self, offset: (int, int)):
+        # current and new piece locations
+        location = self.piece.location
+        new_location = (location[0] + offset[0], location[1] + offset[1])
 
         # check new piece position
-        if self.check_piece_position((x - 1, y)):
+        if self.check_piece_position(new_location):
             # update piece location
-            self.piece.location = (x - 1, y)        
+            self.piece.location = new_location
 
 
     def check_piece_position(self, location=None) -> bool:
         # piece location and size
         if location is None:
             location = self.piece.location
-        (x, y) = location
+        (i, j) = self.coord_to_index(location)
         (piece_h, piece_w) = self.piece.size
 
         # board location
-        sub_board = self.board[x:x + piece_h, y:y + piece_w]
+        sub_board = self.board[i:i + piece_h, j:j + piece_w]
+
+        # check left and right bounds
+        if (j < 0) or (j + piece_w > self.BOARD_SIZE[1]):
+            return False
 
         # check for overlap
         if np.sum(sub_board * self.piece.shape) == 0:
@@ -101,14 +140,14 @@ class TetrisGame:
     
     def render_piece(self, board:np.ndarray):
         # piece size and location
-        (x, y) = self.piece.location
+        (i, j) = self.coord_to_index(self.piece.location)
         (piece_h, piece_w) = self.piece.size
 
         # add piece to board
-        for i, row in enumerate(self.piece.shape):
-            for j, block in enumerate(row):
+        for k, row in enumerate(self.piece.shape):
+            for l, block in enumerate(row):
                 if block != 0:
-                    board[x + i, y + j] = block
+                    board[i + k, j + l] = block
         
 
 
