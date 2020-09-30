@@ -309,6 +309,8 @@ class Tetrimino:
     ]
 
     def __init__(self):
+        """Tetrimino initialization.
+        """
         # generate a new random Tetrimino
         type_index = math.floor(random.random() * 7.0)
 
