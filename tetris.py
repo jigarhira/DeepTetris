@@ -1,6 +1,9 @@
 """Tetris game for AI testing.
 
 Tetris game built in python with internal hooks for AI development.
+
+Author: Jigar Hira
+Version: 1.0
 """
 
 
@@ -11,7 +14,8 @@ import pygame
 
 
 class TetrisGame:
-
+    """Tetris game built with pygame for AI testing.
+    """
     # pygame parameters
     FRAMERATE = 1
     WINDOW_SIZE = (400, 100)
@@ -22,6 +26,8 @@ class TetrisGame:
     BOARD_BOTTOM_FILL_ROWS = 4  # hidden filled rows at the bottom of the board
 
     def __init__(self):
+        """Initialization method.
+        """
         # initialize pygame
         pygame.init()
         self.clock = pygame.time.Clock()
@@ -38,6 +44,8 @@ class TetrisGame:
 
 
     def play(self):
+        """Tetris game. Main game loop and event handling
+        """
         # spawn the first piece
         self.spawn_piece()
 
@@ -80,32 +88,57 @@ class TetrisGame:
 
     
     def print_board(self, board:np.ndarray):
+        """Print board to console.
+
+        Args:
+            board (np.ndarray): Game board array.
+        """
         print('\n\n------~ TETRIS ~------')
         print(np.flipud(board[0:26, :]))
 
 
     def coord_to_index(self, coord: (int, int)) -> (int, int):
+        """Converts tetris coordinates to board indicies.
+
+        Args:
+            coord ((int, int)): Tetris coordinates with origin at bottom left.
+
+        Returns:
+            (int, int): Board indicies.
+        """
         return (coord[0] + self.BOARD_BOTTOM_FILL_ROWS, coord[1])
 
 
     def spawn_piece(self):
-        # create new Tetrimino
+        """Generate new piece.
+        """
         self.piece = Tetrimino()
 
 
     def piece_down(self):
+        """Move piece down one block if valid.
+        """
         self.piece_move((-1, 0))
 
 
     def piece_left(self):
+        """Move piece left one block if valid.
+        """
         self.piece_move((0, -1))
 
 
     def piece_right(self):
+        """Move piece right once block if valid.
+        """
         self.piece_move((0, 1))
 
 
     def piece_move(self, offset: (int, int)):
+        """Move piece by x and y offset if valid.
+
+        Args:
+            offset (int, int): x and y offset for new piece location.
+        """
         # current and new piece locations
         location = self.piece.location
         new_location = (location[0] + offset[0], location[1] + offset[1])
@@ -117,6 +150,8 @@ class TetrisGame:
 
 
     def piece_rotate(self):
+        """Rotate piece 90 degrees clockwise if valid.
+        """
         # current and new piece rotation
         rotation = self.piece.shape
         new_rotation = np.rot90(rotation)
@@ -128,6 +163,15 @@ class TetrisGame:
 
 
     def check_piece_position(self, location=None, shape=None) -> bool:
+        """Check if piece position and rotation is valid.
+
+        Args:
+            location ((int, int), optional): New piece location. Defaults to current piece location.
+            shape (np.ndarray, optional): New piece shape or rotation. Defaults to current piece shape.
+
+        Returns:
+            bool: If piece position is valid on the current board.
+        """
         # default parameters
         if location is None:
             location = self.piece.location
@@ -158,6 +202,12 @@ class TetrisGame:
 
     
     def render_board(self) -> np.ndarray:
+        """Render all game elements onto the board. Adds the current piece
+        to the board. Returns fully rendered board.
+
+        Returns:
+            np.ndarray: Fully rendered board array.
+        """
         # rendered board
         rendered_board = np.copy(self.board)
 
@@ -168,6 +218,11 @@ class TetrisGame:
     
     
     def render_piece(self, board:np.ndarray):
+        """Render the current piece onto the board.
+
+        Args:
+            board (np.ndarray): Board matrix to add the current piece to.
+        """
         # piece size and location
         (i, j) = self.coord_to_index(self.piece.location)
         (piece_h, piece_w) = self.piece.size
@@ -182,7 +237,8 @@ class TetrisGame:
 
 
 class Tetrimino:
-
+    """Tetrimino (tetris piece) class.
+    """
     # 7 types of Tetrimino pieces
     TETRIMINO_TYPES = [
         {                   # I
