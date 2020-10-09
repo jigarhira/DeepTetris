@@ -89,8 +89,6 @@ class TetrisGame:
                     pygame.quit()
                     break
 
-            # check if piece should be placed
-
             # check board for completed row
             
 
@@ -130,9 +128,15 @@ class TetrisGame:
 
 
     def piece_down(self):
-        """Move piece down one block if valid.
+        """Move piece down one block if valid, otherwise spawn a new piece
         """
-        self.piece_move((-1, 0))
+        if not self.piece_move((-1, 0)):
+            # add current piece to board
+            self.render_piece(self.board)
+
+            # spawn new piece
+            self.spawn_piece()
+
 
 
     def piece_left(self):
@@ -152,6 +156,9 @@ class TetrisGame:
 
         Args:
             offset (int, int): x and y offset for new piece location.
+
+        Returns:
+            bool: If piece was moved.
         """
         # current and new piece locations
         location = self.piece.location
@@ -161,6 +168,9 @@ class TetrisGame:
         if self.check_piece_position(location=new_location):
             # update piece location
             self.piece.location = new_location
+            return True
+        
+        return False
 
 
     def piece_rotate(self):
