@@ -17,13 +17,18 @@ class TetrisGame:
     """Tetris game built with pygame for AI testing.
     """
     # pygame parameters
-    FRAMERATE = 1
-    WINDOW_SIZE = (400, 100)
+    GAME_SPEED = 1.0                        # speed multiplier for game
+    FRAMERATE = 2                           # rendering framerate
+    DROP_INTERVAL_MS = 1000.0 / GAME_SPEED  # inverval for automatic drop (miliseconds)
+    WINDOW_SIZE = (200, 100)
     WINDOW_TITLE = 'Tetris'
+    # pygame events
+    DROP_EVENT = pygame.USEREVENT + 1
 
     # tetris parameters
-    BOARD_SIZE = (44, 10)       # internal game board size, 20 rows are visable
-    BOARD_BOTTOM_FILL_ROWS = 4  # hidden filled rows at the bottom of the board
+    BOARD_SIZE = (44, 18)           # internal game board size, 20 rows and middle 10 columns are visable
+    BOARD_BOTTOM_FILL_ROWS = 4      # hidden filled rows at the bottom of the board
+    BOARD_SIDE_FILL_COLUMNS = 4     # hidden filled columns on the sides of the board
 
     def __init__(self):
         """Initialization method.
@@ -37,7 +42,11 @@ class TetrisGame:
 
         # initialize game board
         self.board = np.zeros(self.BOARD_SIZE, dtype=int)
-        self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), 7)   # fill hidden portion at the bottom of the board
+
+        # fill hidden portions of the board on bottom and sides
+        self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), 7)
+        self.board[:, 0:self.BOARD_SIDE_FILL_COLUMNS] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), 7)
+        self.board[:, self.BOARD_SIZE[1] - self.BOARD_SIDE_FILL_COLUMNS:self.BOARD_SIZE[1]] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), 7)
 
         # initialize score
         self.score = 0
@@ -46,6 +55,9 @@ class TetrisGame:
     def play(self):
         """Tetris game. Main game loop and event handling
         """
+        # setup timers
+        pygame.time.set_timer(self.DROP_EVENT, int(self.DROP_INTERVAL_MS))
+
         # spawn the first piece
         self.spawn_piece()
 
@@ -70,12 +82,14 @@ class TetrisGame:
                     elif event.key == pygame.K_SPACE:
                         # drop piece to bottom
                         pass
+                elif event.type == self.DROP_EVENT: # drop piece
+                    # move piece down
+                    self.piece_down()
                 elif event.type == pygame.QUIT:     # close window
                     pygame.quit()
                     break
 
-            # move the piece down at one second intervals
-                # check if piece should be placed
+            # check if piece should be placed
 
             # check board for completed row
             
@@ -106,7 +120,7 @@ class TetrisGame:
         Returns:
             (int, int): Board indicies.
         """
-        return (coord[0] + self.BOARD_BOTTOM_FILL_ROWS, coord[1])
+        return (coord[0] + self.BOARD_BOTTOM_FILL_ROWS, coord[1] + self.BOARD_SIDE_FILL_COLUMNS)
 
 
     def spawn_piece(self):
@@ -188,9 +202,9 @@ class TetrisGame:
         # TODO
         # THERE IS AN ERROR HERE. BOUNDARY BOX WILL RESTRICT MOVEMENT.
 
-        # check left and right bounds
-        if (j < 0) or (j + piece_w > self.BOARD_SIZE[1]):
-            return False
+        # # check left and right bounds
+        # if (j < 0) or (j + piece_w > self.BOARD_SIZE[1]):
+        #     return False
 
         # check for overlap
         if np.sum(sub_board * shape) == 0:
@@ -324,8 +338,6 @@ class Tetrimino:
 
 
 if __name__ == "__main__":
-    #pass
-
     tetris = TetrisGame()
     tetris.play()
     
