@@ -18,7 +18,7 @@ class TetrisGame:
     """
     # pygame parameters
     GAME_SPEED = 1.0                        # speed multiplier for game
-    FRAMERATE = 2                           # rendering framerate
+    FRAMERATE = 1                           # rendering framerate
     DROP_INTERVAL_MS = 1000.0 / GAME_SPEED  # inverval for automatic drop (miliseconds)
     WINDOW_SIZE = (200, 100)
     WINDOW_TITLE = 'Tetris'
@@ -29,6 +29,7 @@ class TetrisGame:
     BOARD_SIZE = (44, 18)           # internal game board size, 20 rows and middle 10 columns are visable
     BOARD_BOTTOM_FILL_ROWS = 4      # hidden filled rows at the bottom of the board
     BOARD_SIDE_FILL_COLUMNS = 4     # hidden filled columns on the sides of the board
+    BOARD_FILL_VALUE = 7            # value for hidden filled regions of the board
 
     def __init__(self):
         """Initialization method.
@@ -44,9 +45,9 @@ class TetrisGame:
         self.board = np.zeros(self.BOARD_SIZE, dtype=int)
 
         # fill hidden portions of the board on bottom and sides
-        self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), 7)
-        self.board[:, 0:self.BOARD_SIDE_FILL_COLUMNS] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), 7)
-        self.board[:, self.BOARD_SIZE[1] - self.BOARD_SIDE_FILL_COLUMNS:self.BOARD_SIZE[1]] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), 7)
+        self.board[0:self.BOARD_BOTTOM_FILL_ROWS] = np.full((self.BOARD_BOTTOM_FILL_ROWS, self.BOARD_SIZE[1]), self.BOARD_FILL_VALUE)
+        self.board[:, 0:self.BOARD_SIDE_FILL_COLUMNS] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), self.BOARD_FILL_VALUE)
+        self.board[:, self.BOARD_SIZE[1] - self.BOARD_SIDE_FILL_COLUMNS:self.BOARD_SIZE[1]] = np.full((self.BOARD_SIZE[0], self.BOARD_SIDE_FILL_COLUMNS), self.BOARD_FILL_VALUE)
 
         # initialize score
         self.score = 0
@@ -134,6 +135,9 @@ class TetrisGame:
             # add current piece to board
             self.render_piece(self.board)
 
+            # clear completed rows
+            self.clear_rows()
+
             # spawn new piece
             self.spawn_piece()
 
@@ -151,7 +155,7 @@ class TetrisGame:
         self.piece_move((0, 1))
 
 
-    def piece_move(self, offset: (int, int)):
+    def piece_move(self, offset: (int, int)) -> bool:
         """Move piece by x and y offset if valid.
 
         Args:
@@ -209,13 +213,6 @@ class TetrisGame:
         # board location
         sub_board = self.board[i:i + piece_h, j:j + piece_w]
 
-        # TODO
-        # THERE IS AN ERROR HERE. BOUNDARY BOX WILL RESTRICT MOVEMENT.
-
-        # # check left and right bounds
-        # if (j < 0) or (j + piece_w > self.BOARD_SIZE[1]):
-        #     return False
-
         # check for overlap
         if np.sum(sub_board * shape) == 0:
             # valid position
@@ -223,6 +220,74 @@ class TetrisGame:
         else:
             # overlap found
             return False
+
+
+    def clear_rows(self):
+        # piece location and size
+        (i, _) = self.coord_to_index(self.piece.location)
+        (piece_h, _) = self.piece.size
+
+        # clear and move down piece rows
+        cleared_lines = 0
+        row_top = i
+        row = i - piece_h + 1
+        for piece_row in range(piece_h):
+            # check bottom row of piece
+            if self.check_row_complete(row):
+                # shift down piece rows
+                self.shift_rows_down(1, row + 1, row_top)
+                cleared_lines += 1
+                row_top -= 1
+            else:
+                row += 1
+
+        # shift all rows above piece down by the number of cleared lines
+        self.shift_rows_down(cleared_lines, row)
+
+        # update score
+        self.score += cleared_lines
+
+
+    
+    def check_row_complete(self, i: int) -> bool:
+        """Checks if row is completed.
+
+        Args:
+            i (int): Row index.
+
+        Returns:
+            bool: If row is complete.
+        """
+        # row to check
+        row = self.board[i, self.BOARD_SIDE_FILL_COLUMNS:self.BOARD_SIZE[1] - self.BOARD_SIDE_FILL_COLUMNS]
+
+        # check if row is complete
+        for block in row:
+            if block == 0 or block == self.BOARD_FILL_VALUE:
+                return False
+        
+        return True
+
+
+    def shift_rows_down(self, down_rows: int, start_row: int, end_row=None):
+        """Shift rows down a specified number of times. Shifts in empty rows with hidden area filled.
+
+        Args:
+            down_rows (int): Number of rows to move down.
+            start_row (int): Lower bound index of rows to shift.
+            end_row: Upper bound index of rows to shift. Default is top of board.
+        """
+        # defualt end row is top of the board
+        if end_row is None:
+            end_row = self.BOARD_SIZE[0]
+
+        # shift down each row
+        for row in range(start_row, end_row):
+            self.board[row - down_rows] = self.board[row]
+
+        # fill hidden areas
+        self.board[(end_row - down_rows):end_row, 0:self.BOARD_SIDE_FILL_COLUMNS] = np.full((down_rows, self.BOARD_SIDE_FILL_COLUMNS), self.BOARD_FILL_VALUE)
+        self.board[(end_row - down_rows):end_row, self.BOARD_SIZE[1] - self.BOARD_SIDE_FILL_COLUMNS:self.BOARD_SIZE[1]] = np.full((down_rows, self.BOARD_SIDE_FILL_COLUMNS), self.BOARD_FILL_VALUE)
 
     
     def render_board(self) -> np.ndarray:
